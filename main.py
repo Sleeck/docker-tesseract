@@ -17,7 +17,7 @@ def get_ocr_pdf():
     OCR image to pdf
     ---
     tags:
-      - stream
+      - ocr
     parameters:
       - in: formData
         name: image
@@ -29,6 +29,11 @@ def get_ocr_pdf():
         type: string
         required: true
         description: Language
+      - in: formData
+        name: timeout
+        type: int
+        required: false
+        description: Timeout
     responses:
       500:
         description: Error message
@@ -50,7 +55,17 @@ def get_ocr_pdf():
     file = NamedTemporaryFile()
     image_file.save(file.name)
 
-    pdf = pytesseract.image_to_pdf_or_hocr(file.name, lang=request.form['lang'], config='', nice=0, extension='pdf')
+    timeout = 300
+    if "timeout" in request.form and int(request.form['timeout']) > 0:
+        timeout = int(request.form['timeout'])
+
+    pdf = pytesseract.image_to_pdf_or_hocr(file.name,
+                                           lang=request.form['lang'],
+                                           config='',
+                                           nice=0,
+                                           extension='pdf',
+                                           timeout=timeout
+                                           )
 
     return pdf
 
